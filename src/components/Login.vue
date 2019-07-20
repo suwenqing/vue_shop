@@ -49,7 +49,7 @@ export default {
       this.$refs.loginFormRef.validate(async flag=>{
         if(flag){
           console.log("校验成功",this)
-          const {data:res} = await this.axios.post('login',this.loginForm)
+          const res = await this.axios.post('login',this.loginForm)
           console.log(res)
           if(res.meta.status!==200){
             this.$message.error(res.meta.msg)

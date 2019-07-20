@@ -10,6 +10,16 @@ import axios from 'axios'
 
 //给Vue原型对象添加方法
 axios.defaults.baseURL = "http://127.0.0.1:8888/api/private/v1/"
+// 在Authorization中添加token
+axios.interceptors.request.use(config=>{
+  config.headers.Authorization = sessionStorage.getItem('token')
+  return config
+})
+//响应拦截 获取想要得到的数据
+axios.interceptors.response.use(res=>{
+  return res.data
+})
+
 Vue.prototype.axios = axios
 Vue.config.productionTip = false
 
