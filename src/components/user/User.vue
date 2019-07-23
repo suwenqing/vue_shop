@@ -9,13 +9,14 @@
 
     <!-- 卡片表单 -->
     <el-card class="box-card">
+      <!-- 查询输入框 -->
       <el-row :gutter="20">
         <el-col :span="8">
           <el-input placeholder="请输入内容"  class="input-with-select" v-model="queryData.query" clearable @clear="getUserList">
             <el-button slot="append" icon="el-icon-search" @click="getUserList"></el-button>
           </el-input>
         </el-col>
-
+        <!-- 添加用户 -->
         <el-col :span="5">
           <el-button type="primary" @click="addDialogVisible=true">添加</el-button>
         </el-col>
@@ -44,7 +45,7 @@
             <el-button size="mini" icon="el-icon-delete" type="danger" @click="deleteUser(item.row.id)"></el-button>
             <!-- 分配用户 -->
             <el-tooltip class="item" effect="dark" content="分配角色" placement="top" :enterable="false">
-              <el-button size="mini" icon="el-icon-setting" type="warning"></el-button>
+              <el-button size="mini" icon="el-icon-setting" type="warning" @click="showSetDialog(item.row)"></el-button>
             </el-tooltip>
           </template>
         </el-table-column>
@@ -106,6 +107,29 @@
         <span slot="footer" class="dialog-footer">
           <el-button @click="editDialogVisible = false">取 消</el-button>
           <el-button type="primary" @click="editUserSub">确 定</el-button>
+        </span>
+      </el-dialog>
+
+      <!-- 分配角色对话框 -->
+       <el-dialog
+        title="提示"
+        :visible.sync="setDialogVisible"
+        width="50%" @close="resetSetForm">
+          <el-form :model="setForm" :rules="setRule" ref="setFormRef" label-width="70px">
+            <p> <span>当前用户:</span> {{userInfo.username}}</p>
+            <p> <span>当前角色:</span> {{userInfo.role_name}}</p>
+            选择角色:
+            <el-select v-model="roleId" placeholder="请选择角色">
+              <el-option  
+              v-for="item in roleList" 
+              :key="item.id" 
+              :label="item.roleName" 
+              :value="item.id"></el-option>
+            </el-select>
+          </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="setDialogVisible = false">取 消</el-button>
+          <el-button type="primary" @click="setRoleSub">确 定</el-button>
         </span>
       </el-dialog>
     </el-card>
@@ -183,7 +207,14 @@ export default {
           { required: true, message: '手机不能为空',trigger:'blur'},
           { validator:checkMobile,trigger:'blur'}
         ]
-      }
+      },
+      userInfo:{
+        
+      },
+      setDialogVisible:false,
+      setForm:{},
+      roleList:[],
+      roleId:[]
     };
   },
 
@@ -263,7 +294,6 @@ export default {
         }
       })
     },
-    
     // 删除单个用户
     deleteUser(id){
       this.$confirm('确认删除用户？', '提示', {
@@ -291,6 +321,30 @@ export default {
             message: '已取消删除'
           });          
         });
+    },
+    // 分配角色
+    async showSetDialog(row){
+      console.log(row)
+      this.userInfo = row
+      this.setDialogVisible = true
+      const res = await this.axios.get('roles')
+      if(res.meta.status==200){
+        this.roleList = res.data
+      }
+    },
+    // 设置角色
+    async setRoleSub(){
+      // console.log(this.roleId)
+      if(!this.roleId) return this.$message.error("修改角色失败")
+      const res = await this.axios.put(`users/${this.userInfo.id}/role`,{
+        rid:this.roleId
+      })
+      // console.log(res)
+      if(res.meta.status==200){
+        this.$message.success(res.meta.msg)
+        this.setDialogVisible = false
+        this.getUserList()
+      }
     }
   },
   mounted(){

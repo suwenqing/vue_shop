@@ -7,6 +7,9 @@ import './assets/css/main.css'
 import './assets/fonts/iconfont.css'
 // 导入axios
 import axios from 'axios'
+import ZkTable from 'vue-table-with-tree-grid'
+
+Vue.component('tree-table', ZkTable)
 
 //给Vue原型对象添加方法
 axios.defaults.baseURL = "http://127.0.0.1:8888/api/private/v1/"

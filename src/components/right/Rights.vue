@@ -32,7 +32,7 @@ export default {
     async getRights(){
       const res = await this.axios.get('rights/list')
       if(res.meta.status==200){
-        console.log(res.data)
+        // console.log(res.data)
         this.rightsList = res.data
       }
     }
