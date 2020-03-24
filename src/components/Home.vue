@@ -1,45 +1,25 @@
 <template>
-  <el-container>
+  <el-container class="home-init">
     <el-header>
       <div>
-        <img src="../assets/heima.png" alt />
-        <span>电商后台管理系统</span>
+        <i class="el-icon-delete"></i>
+        <span>我的博客</span>
       </div>
       <el-button type="info" @click="logout">退出</el-button>
     </el-header>
     <el-container>
-      <!-- 左侧导航 -->
-      <el-aside :width="isCollapse?'64px':'200px'">
-        <div class="toggleMenu" @click="isCollapse=!isCollapse">|||</div>
-        <el-menu 
-        :collapse="isCollapse" 
-        :collapse-transition="false" 
-        :default-active="activeIndex"
-        unique-opened 
-        router
-        class="el-menu-vertical-demo" 
-        background-color="#373d41" 
-        text-color="#fff" 
-        active-text-color="rgba(64,158,255)">
-          <!-- 列表一 -->
-          <!-- 一级标题 -->
-          <el-submenu :index="item.id.toString()" :key="item.id" v-for="item in listMenu">
+      <el-aside width="200px">
+        <el-menu text-color="#fff" active-text-color="#ffd04b" background-color="#333744" :default-active="activePath" unique-opened router>
+          <el-submenu :index="item.id+''" v-for="item in menuList" :key="item.id">
             <template slot="title">
-              <i :class="iconsList[item.id]"></i>
+              <i class="el-icon-menu"></i>
               <span>{{item.authName}}</span>
             </template>
-            <!-- 二级标题 -->
-            <el-menu-item @click="setActiveIndex('/'+item.path)" :index="'/'+item.path" :key="item.id" v-for="item in item.children">
-              <template slot="title">
-                <i class="el-icon-menu"></i>
-                <span>{{item.authName}}</span>
-              </template>
-            </el-menu-item>
+            <el-menu-item :index="'/'+subItem.path" v-for="subItem in item.children" :key="subItem.id" @click="setActivePath('/'+subItem.path)">{{subItem.authName}}</el-menu-item>
           </el-submenu>
         </el-menu>
       </el-aside>
 
-      <!-- 右侧主题内容 -->
       <el-main>
         <router-view></router-view>
       </el-main>
@@ -48,83 +28,48 @@
 </template>
 
 <script>
-export default {
-  data() {
-    return {
-      listMenu:[],
-      iconsList:{
-        '125':'iconfont icon-users',
-        '103':'iconfont icon-tijikongjian',
-        '101':'iconfont icon-shangpin',
-        '102':'iconfont icon-danju',
-        '145':'iconfont icon-baobiao'
+  export default {
+    data() {
+      return {
+        menuList : [],
+        activePath: ''
+      };
+    },
+    created() {
+      this.getMenuList();
+      this.activePath = window.sessionStorage.getItem('activePath');
+    },
+    methods: {
+      logout() {
+        window.sessionStorage.clear();
+        this.$router.push("/login");
       },
-      isCollapse:false,
-      activeIndex:''
-    };
-  },
-
-  methods: {
-    logout() {
-      sessionStorage.removeItem("token");
-      this.$router.push("/login");
-      this.$message.success("退出成功");
+      async getMenuList() {
+        const {data:res} = await this.axios.get('menus');
+        if(res.meta.status != 200) return this.$message.error(res.meta.message);
+        this.menuList = res.data;
+      },
+      setActivePath(activePath) {
+        window.sessionStorage.setItem('activePath',activePath);
+        this.activePath = activePath;
+      }
     },
-    async getListMenu(){
-      const res = await this.axios.get('menus')
-      this.listMenu = res.data
-    },
-    setActiveIndex(index){  
-      this.activeIndex = index  
-      sessionStorage.setItem('activeIndex',this.activeIndex)
-    }
-  },
-
-  created() {
-    this.getListMenu()
-    const index = sessionStorage.getItem('activeIndex')
-    this.activeIndex = index
-  }
-};
+  };
 </script>
 
 <style lang='less' scoped>
-.el-container {
-  height: 100%;
+  .home-init {
+    height: 100%;
+  }
+
   .el-header {
-    background-color: #373d41;
+    background-color: #373d4e;
     display: flex;
     justify-content: space-between;
-    padding: 10px 20px;
-    div {
-      display: flex;
-      color: #fff;
-      align-items: center;
-      span {
-        padding-left: 10px;
-      }
-    }
+    align-items: center;
   }
+
   .el-aside {
     background-color: #333744;
-    .toggleMenu{
-      color:#fff;
-      text-align: center;
-      height:30px;
-      line-height: 30px;
-      user-select: none;
-      cursor: pointer;
-      background-color: #337442;
-    }
-    .el-menu{
-      border-right:none;
-      .iconfont{
-      margin-right: 10px;
-      }
-    }
   }
-  .el-main {
-    background-color: #eee;
-  }
-}
 </style>

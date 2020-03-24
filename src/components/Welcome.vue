@@ -1,21 +1,21 @@
 <template>
-  <div>
-    welcome 
-  </div>
+    <div>
+        欢迎
+    </div>
 </template>
 
 <script>
-export default {
+    export default {
 
-  data () {
-    return {
+    data () {
+      return {
+      }
+    },
+
+    methods: {},
+
+    created () {
     }
-  },
-
-  methods: {},
-
-  created () {
-  }
 }
 </script>
 
